@@ -1,7 +1,7 @@
 <%- @databases.each do |env, db| %>
 <%= env %>:
   adapter: <%= db['adapter'] %>
-  host: <%= @host %>
+  host: <%= db['host'] ? db['host'] : @host %>
   database: <%= db['database'] %>
   username: <%= db['username'] %>
   password: <%= db['password'] %>

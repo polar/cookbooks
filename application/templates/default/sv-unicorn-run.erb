@@ -1,7 +1,15 @@
 #!/bin/bash
 
-cd <%= @options[:app]['deploy_to'] %>/current
+cd <%= @options[:working_directory] %>
+
+owner      = <%= @options[:owner] %>
+group      = <%= @options[:group] %>
+configfile = <%= @options[:conf_file] %>
+appenv     = <%= @options[:app_environment] %>
+
+# Command may be "unicorn_rails" for pre-rack rails, otherwise "unicorn".
+unicorncmd = <%= @options[:unicorn_command] %>
 
 exec 2>&1
-exec chpst -u <%= @options[:app]["owner"] %>:<%= @options[:app]["group"] %> unicorn -E <%= node[:app_environment] %> -c /etc/unicorn/<%= @options[:app]['id'] %>.rb
+exec chpst -u $owner:$group $unicorncmd -E $appenv -c $configfile
 

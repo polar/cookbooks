@@ -22,3 +22,13 @@ include_recipe "ruby"
 include_recipe "rubygems"
 
 gem_package "unicorn"
+
+link "/var/lib/gems/1.8/bin/unicorn" do
+  to "/usr/bin/unicorn"
+  action :create
+end
+
+link "/var/lib/gems/1.8/bin/unicorn_rails" do
+  to "/usr/bin/unicorn_rails"
+  action :create
+end

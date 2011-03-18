@@ -1,3 +1,70 @@
+Polar''s Application Cookbook.
+============================
+
+This cookbook is my attempt to understand Chef and to actually
+get a machine configured to run a rails/unicorn/nginx stacked app
+with a mysql database locally. And try to do it securely! (not there yet).
+
+All I can say, is My God this is bloody difficult. Not only are there
+security problems all over the place, such as Opscode actually generates
+the private keys and sends them to you in clear text over some open
+unencrypted HTTP session, but this is one riduclous speciication
+language.
+
+I can''t blame them, they are using Ruby, which is one of the worst
+languages on the planet, and using it, actually makes you get bad
+habits. Too bad, I like the rails framework, and it uses some cool
+things in Ruby, but bizarre uses of "method_missing" will kill me.
+
+What I don''t like about Chef, is that there is no way to tell if you
+are actually doing anything right without you going off deploying a
+configuration and see if it works. I guess we''ve given up on type
+saftey and all those tools we used to have to stop us from doing that
+type, evaluate, type, evaluate cycle.
+
+Recipes do not have any parameters, none that I can disern.
+Nothing can be specified on a recipe call and be guarranteed.
+You always end up looking in the recipe boxes to see
+what you may need, and ruby allows you to hide a lot of stuff, so
+you can''t see everything, if anything, unless you explicitly
+know how to use it.
+
+This of course, led me to almost totally rewrite these recipes to
+make some more sense. However, I''m far from it.
+
+I decided not to let this recipe be one thing to all, but basically
+use the "Apps" databag to generate a Rails/Unicorn/Nginx application
+and possibly deploy it from a Git repository.
+
+I decided to take a more structured approach on the Databag. I left
+the roles alone, because I''m not sure what to do with them yet.
+
+The app gets defined with its sections taken care of by certain
+recipes that takes care of that section.
+
+| Section   |   Recipe
+|"packages" | packages.rb - gets debian packages
+|"gems"     | gems.rb     - non application specific gems (like rails)
+|"users"    | users.rb    - creates users if necessary
+|"groups"   | users.rb    - creates groups if necessary
+|"directories" | directories.rb - creates log,conf,run directories for the application
+|"rails"    | rails_deploy.rb - sets up directories, database config, and schedules deployment
+|"unicorn"  | unicorn.rb  - sets up unicorn for this Rails application
+|"nginx"    | nginx.rb    - sets up a single nginx instance for this application
+
+Application Specific Attributes
+| "owner"     | The owner must already be defined
+| "group"     | The group must already be defined
+
+Opscode Specific Things that I left alone (for now)
+
+| "database_master_role"| a completely silly and confusing idea.
+| "mysql_root_password" | security
+| "mysql_debian_password" | security
+| "mysql_repl_password" | security
+| "databases" | security, shortened this to just what the database recipe needs. rails_deploy.rb doesn''t get anything from here.
+
+
 Application cookbook
 ====================
 
@@ -103,7 +170,7 @@ Using the node's `run_state` that contains the current application in the search
 The servlet container context configuration (`context.xml`) exposes the following JNDI resources which can be referenced by the webapp's deployment descriptor (web.xml):
 
 * A JDBC datasource for all databases in the node's current `app_environment`.  The datasource uses the information (including JDBC driver) specified in the data bag item for the application.
-* An Environment entry that matches the node's current `app_environment` attribute value.  This is useful for loading environment specific properties files in the web application. 
+* An Environment entry that matches the node's current `app_environment` attribute value.  This is useful for loading environment specific properties files in the web application.
 
 This recipe assumes some sort of build process, such as Maven or a Continuous Integration server like Hudson, will create a deployable artifact and make it available for download via HTTP (such as S3 or artifactory).
 
@@ -183,7 +250,7 @@ The following recipes are deprecated and have been removed from the cookbook. To
 `rails_nginx_ree_passenger`
 
 ---
-Application Data Bag 
+Application Data Bag
 =====================
 
 The applications data bag expects certain values in order to configure parts of the recipe. Below is a paste of the JSON, where the value is a description of the key. Use your own values, as required. Note that this data bag is also used by the `database` cookbook, so it will contain database information as well. Items that may be ambiguous have an example.

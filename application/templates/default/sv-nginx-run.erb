@@ -1,0 +1,4 @@
+#!/bin/bash
+<%= "#This file is specifically for the Rails/Unicorn/NginX application #{@options[:app_name]}" %>
+exec 2>&1
+exec chpst <%=  @options[:binary] %> -c <%= @options[:conf_file] %>
